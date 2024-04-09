@@ -1,12 +1,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: sample-job
+  name: sample-job-8gpu
   namespace: default
   labels:
     kueue.x-k8s.io/queue-name: dws-local-queue
   annotations:
-    provreq.kueue.x-k8s.io/maxRunDurationSeconds: "600"
+    provreq.kueue.x-k8s.io/maxRunDurationSeconds: "6000"
 spec:
   parallelism: 1
   completions: 1
@@ -27,9 +27,9 @@ spec:
           requests:
             cpu: "100m"
             memory: "100Mi"
-            nvidia.com/gpu: 1
+            nvidia.com/gpu: 8
           limits:
             cpu: "100m"
             memory: "100Mi"
-            nvidia.com/gpu: 1
+            nvidia.com/gpu: 8
       restartPolicy: Never
