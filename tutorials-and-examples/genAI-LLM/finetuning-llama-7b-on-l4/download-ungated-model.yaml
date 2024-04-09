@@ -1,0 +1,57 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: model-loader
+  namespace: default
+spec:
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: loader
+        gke-gcsfuse/volumes: "true"
+        gke-gcsfuse/memory-limit: 400Mi
+        gke-gcsfuse/ephemeral-storage-limit: 30Gi
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: loader
+        image: python:3.11
+        command:
+        - /bin/bash
+        - -c
+        - |
+          pip install huggingface_hub
+          mkdir -p /gcs-mount/mistral-7b
+          python3 - << EOF
+          from huggingface_hub import snapshot_download
+          model_id="mistralai/Mistral-7B-Instruct-v0.2"
+          snapshot_download(repo_id=model_id, local_dir="/gcs-mount/mistral-7b",
+                            local_dir_use_symlinks=False, revision="main",
+                            ignore_patterns=["*.safetensors", "model.safetensors.index.json"])
+          EOF
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: gcs-fuse-csi-ephemeral
+          mountPath: /gcs-mount
+      serviceAccountName: refuel-llm-trainer
+      volumes:
+      - name: gcs-fuse-csi-ephemeral
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: ${GCP_BUCKET_NAME}
+            mountOptions: "implicit-dirs"

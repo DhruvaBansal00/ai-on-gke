@@ -25,8 +25,8 @@ from peft import get_peft_model, LoraConfig, prepare_model_for_kbit_training
 import torch
 
 # /gcs-mount will mount the GCS bucket created earlier
-model_path = "/gcs-mount/llama2-7b"
-finetuned_model_path = "/gcs-mount/llama2-7b-american-stories"
+model_path = "/gcs-mount/mistral-7b"
+finetuned_model_path = "/gcs-mount/mistral-7b-american-stories"
 
 tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
 model = AutoModelForCausalLM.from_pretrained(

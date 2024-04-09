@@ -6,8 +6,8 @@ RUN apt-get update && \
 
 RUN pip3 install --no-cache-dir transformers peft datasets bitsandbytes protobuf scipy einops
 
-COPY fine-tune.py /fine-tune.py
+COPY fine-tune-mistral.py /fine-tune-mistral.py
 
 ENV PYTHONUNBUFFERED 1
 
-CMD python3 /fine-tune.py
+CMD python3 /fine-tune-mistral.py
